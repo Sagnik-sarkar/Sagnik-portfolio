@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sagnik Sarkar — I Build Territories. I Close Deals.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,400;1,700;1,900&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --paper:   #EAE3D3;
+  --paper2:  #DED6C3;
+  --paper3:  #F4F0E6;
+  --ink:     #171410;
+  --ink-mid: #4A4336;
+  --ink-dim: #9B9082;
+  --red:     #B3200D;
+  --red-bg:  rgba(179,32,13,0.1);
+  --sepia:   #7A6B52;
+  --green:   #2A7A4B;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Courier Prime', monospace;
+  overflow-x: hidden;
+  cursor: crosshair;
+}
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.05; mix-blend-mode: multiply;
+}
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--paper2); }
+::-webkit-scrollbar-thumb { background: var(--red); }
+
+/* ── PROGRESS BAR ── */
+#pgbar {
+  position: fixed; top: 0; left: 0; z-index: 9999;
+  height: 3px; width: 0%;
+  background: var(--red);
+  box-shadow: 0 0 10px rgba(179,32,13,0.7);
+  transition: width .08s linear;
+  pointer-events: none;
+}
+
+/* ── STATUS PILL ── */
+#status-pill {
+  position: fixed; bottom: 28px; right: 28px; z-index: 800;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--ink); color: var(--paper);
+  padding: 9px 16px 9px 12px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: .65rem; font-weight: 800; letter-spacing: .2em; text-transform: uppercase;
+  border: 1px solid rgba(234,227,211,0.1);
+  opacity: 0; transform: translateY(16px);
+  animation: pillIn .5s 3.2s ease forwards;
+}
+.s-dot { width: 7px; height: 7px; border-radius: 50%; background: #2ECC71; animation: sblink 1.8s ease-in-out infinite; }
+@keyframes sblink { 0%,100%{opacity:1;} 50%{opacity:.15;} }
+@keyframes pillIn { to { opacity:1; transform:translateY(0); } }
+
+/* ── LOADER ── */
+#loader {
+  position: fixed; inset: 0; z-index: 9990;
+  background: var(--paper);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.ld-ref { font-size: .65rem; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 36px; opacity: 0; animation: fin .4s .3s forwards; }
+.ld-stamp { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(3rem,11vw,7.5rem); font-weight: 900; letter-spacing: .06em; color: var(--red); border: 6px solid var(--red); padding: 10px 30px; text-transform: uppercase; opacity: 0; transform: rotate(-12deg) scale(1.5); animation: stampIn .55s .65s cubic-bezier(0.22,1,0.36,1) forwards; }
+.ld-sub { font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: var(--sepia); margin-top: 32px; opacity: 0; animation: fin .4s 1.1s forwards; }
+@keyframes stampIn { to { opacity: .82; transform: rotate(-12deg) scale(1); } }
+@keyframes fin { to { opacity: 1; } }
+#loader.hide { animation: lout .45s 1.8s forwards; }
+@keyframes lout { to { opacity: 0; pointer-events: none; } }
+
+/* ── MOBILE MENU ── */
+#mm {
+  position: fixed; inset: 0; z-index: 700;
+  background: var(--ink);
+  display: flex; flex-direction: column; justify-content: center; padding: 56px 40px;
+  transform: translateX(100%);
+  transition: transform .42s cubic-bezier(0.22,1,0.36,1);
+}
+#mm.open { transform: translateX(0); }
+.mm-x { position: absolute; top: 20px; right: 24px; font-family: 'Barlow Condensed', sans-serif; font-size: .68rem; font-weight: 900; letter-spacing: .2em; text-transform: uppercase; color: var(--red); border: 1px solid var(--red); padding: 8px 14px; cursor: pointer; }
+.mm-meta { font-size: .58rem; letter-spacing: .28em; text-transform: uppercase; color: rgba(234,227,211,0.2); margin-bottom: 40px; }
+.mm-links { list-style: none; }
+.mm-links li { border-bottom: 1px solid rgba(234,227,211,0.07); }
+.mm-links a { display: block; padding: 20px 0; font-family: 'Barlow Condensed', sans-serif; font-size: clamp(2.2rem,8vw,3.8rem); font-weight: 900; text-transform: uppercase; letter-spacing: .03em; color: var(--paper); text-decoration: none; transition: color .2s, padding-left .2s; }
+.mm-links a:hover { color: var(--red); padding-left: 10px; }
+.mm-foot { margin-top: 36px; font-size: .7rem; color: rgba(234,227,211,0.3); }
+.mm-foot a { color: inherit; text-decoration: none; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 600;
+  background: var(--paper); border-bottom: 2px solid var(--ink);
+  padding: 0 48px; display: flex; align-items: stretch; height: 52px;
+}
+.nav-id { display: flex; align-items: center; gap: 10px; border-right: 1px solid rgba(23,20,16,0.15); padding-right: 24px; margin-right: 0; font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-dim); }
+.nav-id strong { color: var(--red); }
+.nav-links { display: flex; align-items: stretch; list-style: none; margin-left: auto; }
+.nav-links li { border-left: 1px solid rgba(23,20,16,0.12); }
+.nav-links a { display: flex; align-items: center; height: 52px; padding: 0 20px; font-family: 'Barlow Condensed', sans-serif; font-size: .68rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-mid); text-decoration: none; transition: background .2s, color .2s; }
+.nav-links a:hover { background: var(--ink); color: var(--paper); }
+.nav-dl a { color: var(--red); font-weight: 800; }
+.nav-dl a:hover { background: var(--red); color: var(--paper); }
+.nav-cta a { background: var(--red); color: var(--paper); font-weight: 900; }
+.nav-cta a:hover { background: #8A1A0A; }
+.nav-burger { display: none; align-items: center; height: 52px; padding: 0 18px; margin-left: auto; border-left: 1px solid var(--ink); font-family: 'Barlow Condensed', sans-serif; font-size: .68rem; font-weight: 900; letter-spacing: .18em; text-transform: uppercase; color: var(--red); cursor: pointer; }
+
+/* ── HERO ── */
+#hero { min-height: 100vh; padding-top: 52px; display: grid; grid-template-columns: 1fr 420px; position: relative; overflow: hidden; }
+.hero-l { padding: 60px 48px 60px 60px; border-right: 2px solid var(--ink); display: flex; flex-direction: column; justify-content: space-between; }
+.hero-tag { display: flex; align-items: center; gap: 14px; margin-bottom: 40px; font-size: .6rem; letter-spacing: .24em; text-transform: uppercase; color: var(--sepia); }
+.hero-tag::before { content: ''; width: 30px; height: 1px; background: var(--sepia); display: block; }
+.hero-name { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.hero-first { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(6rem,15vw,14rem); font-weight: 900; line-height: .88; letter-spacing: -.02em; color: var(--ink); min-height: .9em; display: flex; align-items: baseline; }
+.tw-cursor { display: inline-block; width: 3px; height: .78em; background: var(--red); margin-left: 4px; vertical-align: baseline; flex-shrink: 0; animation: twblink .65s step-end infinite; }
+.tw-cursor.done { display: none; }
+@keyframes twblink { 0%,100%{opacity:1} 50%{opacity:0} }
+.hero-last { font-family: 'Libre Baskerville', serif; font-size: clamp(3rem,7.5vw,6.5rem); font-weight: 400; font-style: italic; color: var(--red); line-height: 1; margin-top: 6px; opacity: 0; transform: translateX(-18px); transition: opacity .7s ease, transform .7s ease; }
+.hero-last.on { opacity: 1; transform: translateX(0); }
+.hero-strip { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(.9rem,2vw,1.5rem); font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-mid); border-top: 1px solid var(--ink-dim); padding-top: 18px; margin-top: 24px; opacity: 0; transition: opacity .6s .2s ease; }
+.hero-strip.on { opacity: 1; }
+.hero-foot { display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid var(--ink); padding-top: 22px; margin-top: 28px; opacity: 0; transition: opacity .6s .35s ease; }
+.hero-foot.on { opacity: 1; }
+.hf-lbl { font-size: .56rem; letter-spacing: .22em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 4px; }
+.hf-val { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: .06em; }
+.hero-r { background: var(--paper2); padding: 56px 32px; display: flex; flex-direction: column; border-left: 0; position: relative; opacity: 0; transition: opacity .8s .5s ease; }
+.hero-r.on { opacity: 1; }
+.dos-head { font-size: .58rem; letter-spacing: .28em; text-transform: uppercase; color: var(--sepia); border-bottom: 1px solid var(--sepia); padding-bottom: 12px; margin-bottom: 24px; }
+.dos-row { margin-bottom: 18px; }
+.dos-lbl { font-size: .56rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 4px; }
+.dos-val { font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 600; letter-spacing: .04em; color: var(--ink); line-height: 1.3; }
+.dos-val.hi { color: var(--red); font-weight: 900; font-size: 1.15rem; }
+.dos-div { border: none; border-top: 1px dashed var(--sepia); margin: 20px 0; }
+.dos-stamp { position: absolute; bottom: 56px; right: 16px; font-family: 'Barlow Condensed', sans-serif; font-size: 1.3rem; font-weight: 900; letter-spacing: .14em; color: var(--red); border: 3px solid var(--red); padding: 5px 12px; transform: rotate(18deg); opacity: 0.55; user-select: none; pointer-events: none; }
+.hero-contacts { margin-top: auto; }
+.hc-link { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px dashed rgba(23,20,16,0.18); font-size: .7rem; letter-spacing: .05em; color: var(--ink-mid); text-decoration: none; transition: color .2s; }
+.hc-link:hover { color: var(--red); }
+.hc-link:last-child { border-bottom: none; }
+.dl-btn { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 18px; font-family: 'Barlow Condensed', sans-serif; font-size: .72rem; font-weight: 900; letter-spacing: .18em; text-transform: uppercase; color: var(--paper); background: var(--ink); padding: 13px 18px; text-decoration: none; border: 2px solid var(--ink); transition: background .25s, color .25s; }
+.dl-btn:hover { background: transparent; color: var(--ink); }
+.dl-btn svg { width: 13px; height: 13px; fill: currentColor; flex-shrink: 0; }
+
+/* ── TICKERS ── */
+.ticker-deals { background: var(--red); overflow: hidden; padding: 11px 0; }
+.td-inner { display: flex; white-space: nowrap; animation: tck 32s linear infinite; }
+.td-inner .td { font-family: 'Courier Prime', monospace; font-size: .7rem; color: rgba(234,227,211,0.85); padding: 0 24px; }
+.td-inner .td-won { font-weight: 700; color: var(--paper); }
+.td-inner .td-sep { color: rgba(234,227,211,0.2); padding: 0 4px; }
+.ticker-skills { background: var(--ink); overflow: hidden; padding: 11px 0; }
+.ts-inner { display: flex; white-space: nowrap; animation: tck 24s linear infinite; }
+.ts-inner .ts { font-family: 'Barlow Condensed', sans-serif; font-size: .82rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--paper); padding: 0 32px; }
+.ts-inner .ts-r { color: var(--red); }
+.ts-inner .ts-sep { color: rgba(234,227,211,0.15); padding: 0; }
+@keyframes tck { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* ── STATS ── */
+#stats { background: var(--ink); }
+.stats-grid { display: grid; grid-template-columns: repeat(4,1fr); }
+.stat-cell { padding: 60px 36px; border-right: 1px solid rgba(234,227,211,0.07); opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+.stat-cell.on { opacity: 1; transform: translateY(0); }
+.stat-cell:last-child { border-right: none; }
+.sc-idx { font-size: .56rem; letter-spacing: .22em; text-transform: uppercase; color: rgba(234,227,211,0.22); margin-bottom: 36px; }
+.sc-num { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(3rem,4.5vw,5rem); font-weight: 900; line-height: 1; color: var(--paper); margin-bottom: 10px; }
+.sc-num .acc { color: var(--red); }
+.sc-lbl { font-size: .72rem; line-height: 1.55; color: rgba(234,227,211,0.4); }
+
+/* ── SECTION BASE ── */
+.si { max-width: 1280px; margin: 0 auto; padding: 96px 60px; }
+.s-brow { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; font-size: .6rem; letter-spacing: .28em; text-transform: uppercase; color: var(--sepia); }
+.s-brow::after { content: ''; flex: 1; height: 1px; background: var(--sepia); }
+.s-brow-n { font-family: 'Barlow Condensed', sans-serif; font-size: .62rem; font-weight: 700; color: var(--red); }
+.s-h { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(2.8rem,6vw,5.8rem); font-weight: 900; line-height: .94; letter-spacing: -.01em; text-transform: uppercase; margin-bottom: 56px; }
+.s-h em { font-family: 'Libre Baskerville', serif; font-style: italic; font-weight: 400; text-transform: none; color: var(--red); }
+.reveal { opacity: 0; transform: translateY(22px); transition: opacity .65s ease, transform .65s ease; }
+.reveal.on { opacity: 1; transform: translateY(0); }
+
+/* ── ABOUT ── */
+#about { background: var(--paper3); border-top: 2px solid var(--ink); }
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; border: 2px solid var(--ink); }
+.about-l { padding: 56px; border-right: 2px solid var(--ink); }
+.about-quote { font-family: 'Libre Baskerville', serif; font-size: clamp(1.1rem,2.2vw,1.65rem); font-style: italic; line-height: 1.55; color: var(--ink); border-left: 4px solid var(--red); padding-left: 24px; margin-bottom: 32px; }
+.redact-tip { font-size: .58rem; letter-spacing: .1em; color: var(--ink-dim); margin-bottom: 20px; font-style: italic; }
+.redact-tip span { color: var(--red); }
+.about-body p { font-size: .86rem; line-height: 1.85; color: var(--ink-mid); margin-bottom: 16px; }
+.about-body p strong { color: var(--ink); font-weight: 700; }
+.rx { display: inline; background: var(--ink); color: transparent; cursor: pointer; padding: 0 2px; border-radius: 1px; transition: background .25s, color .25s; letter-spacing: .06em; }
+.rx:hover, .rx.open { background: rgba(179,32,13,0.1) !important; color: var(--red) !important; }
+.about-r { padding: 56px; background: var(--paper2); display: flex; flex-direction: column; justify-content: space-between; }
+.ar-lbl { font-size: .58rem; letter-spacing: .26em; text-transform: uppercase; color: var(--sepia); margin-bottom: 36px; }
+.pf { padding: 14px 0; border-bottom: 1px dashed rgba(23,20,16,0.13); }
+.pf:last-of-type { border-bottom: none; }
+.pf-k { font-size: .56rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 4px; }
+.pf-v { font-family: 'Barlow Condensed', sans-serif; font-size: 1.02rem; font-weight: 700; letter-spacing: .04em; color: var(--ink); }
+.ar-ctas { margin-top: 28px; display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-red { display: inline-block; font-family: 'Barlow Condensed', sans-serif; font-size: .75rem; font-weight: 900; letter-spacing: .18em; text-transform: uppercase; color: var(--paper); background: var(--red); padding: 14px 26px; text-decoration: none; border: 2px solid var(--red); transition: background .25s, color .25s; }
+.btn-red:hover { background: transparent; color: var(--red); }
+.btn-ink { display: inline-block; font-family: 'Barlow Condensed', sans-serif; font-size: .75rem; font-weight: 900; letter-spacing: .18em; text-transform: uppercase; color: var(--ink); background: transparent; padding: 14px 26px; text-decoration: none; border: 2px solid var(--ink); transition: background .25s, color .25s; }
+.btn-ink:hover { background: var(--ink); color: var(--paper); }
+
+/* ── CASE FILES ── */
+#cases { background: var(--paper2); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
+.drag-hint { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-dim); }
+.drag-arrow { font-size: 1rem; animation: nudge 1.8s ease-in-out infinite; }
+@keyframes nudge { 0%,100%{transform:translateX(0)} 50%{transform:translateX(6px)} }
+.htrack { overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; cursor: grab; user-select: none; scrollbar-width: thin; scrollbar-color: var(--red) var(--paper2); padding-bottom: 6px; }
+.htrack:active { cursor: grabbing; }
+.htrack::-webkit-scrollbar { height: 3px; }
+.htrack::-webkit-scrollbar-thumb { background: var(--red); }
+.hinner { display: flex; gap: 0; width: max-content; }
+.cfile { width: min(700px,86vw); flex-shrink: 0; scroll-snap-align: start; display: grid; grid-template-columns: 210px 1fr; border: 2px solid var(--ink); margin-right: 20px; background: var(--paper); transition: box-shadow .3s; }
+.cfile:hover { box-shadow: 5px 5px 0 var(--ink); }
+.cf-meta { background: var(--paper2); padding: 32px 24px; border-right: 2px solid var(--ink); display: flex; flex-direction: column; }
+.cf-num { font-size: .56rem; letter-spacing: .2em; text-transform: uppercase; color: var(--sepia); margin-bottom: 14px; }
+.cf-date { font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--red); letter-spacing: .05em; margin-bottom: 5px; }
+.cf-co { font-family: 'Libre Baskerville', serif; font-size: .9rem; font-weight: 700; line-height: 1.3; margin-bottom: 3px; }
+.cf-loc { font-size: .7rem; color: var(--ink-dim); font-style: italic; margin-bottom: 18px; }
+.cf-verdict { display: inline-block; align-self: flex-start; font-family: 'Barlow Condensed', sans-serif; font-size: .62rem; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; color: var(--red); border: 2px solid var(--red); padding: 4px 9px; transform: rotate(-2deg); }
+.cf-tags { margin-top: auto; padding-top: 18px; display: flex; flex-wrap: wrap; gap: 5px; }
+.cf-tag { font-size: .56rem; letter-spacing: .1em; text-transform: uppercase; color: var(--sepia); border: 1px solid var(--sepia); padding: 3px 7px; }
+.cf-body { padding: 32px 30px; overflow-y: auto; max-height: 480px; }
+.cf-role { font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; line-height: 1; margin-bottom: 20px; border-bottom: 1px solid rgba(23,20,16,0.1); padding-bottom: 14px; }
+.cf-wins { list-style: none; }
+.cf-wins li { display: grid; grid-template-columns: 16px 1fr; gap: 10px; align-items: start; padding: 10px 0; border-bottom: 1px dashed rgba(23,20,16,0.09); font-size: .83rem; line-height: 1.7; color: var(--ink-mid); }
+.cf-wins li:last-child { border-bottom: none; }
+.cf-wins .blt { font-family: 'Barlow Condensed', sans-serif; font-size: .7rem; font-weight: 900; color: var(--red); padding-top: 2px; }
+.cf-wins strong { color: var(--ink); font-weight: 700; }
+.hpad { width: 60px; flex-shrink: 0; }
+
+/* ── DEAL CALCULATOR ── */
+#calc { background: var(--paper); border-top: 2px solid var(--ink); }
+.calc-box { border: 2px solid var(--ink); }
+.calc-top { background: var(--ink); padding: 18px 36px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.calc-top-t { font-family: 'Barlow Condensed', sans-serif; font-size: .78rem; font-weight: 900; letter-spacing: .24em; text-transform: uppercase; color: var(--paper); }
+.calc-top-r { font-size: .58rem; letter-spacing: .15em; color: rgba(234,227,211,0.3); }
+.calc-body { display: grid; grid-template-columns: 1fr 1fr; }
+.calc-in { padding: 44px 40px; border-right: 2px solid var(--ink); }
+.calc-out { padding: 44px 40px; background: var(--paper2); }
+.cf-lbl { display: block; font-size: .58rem; letter-spacing: .22em; text-transform: uppercase; color: var(--sepia); margin-bottom: 9px; }
+.cf-field { margin-bottom: 28px; }
+.range-row { display: flex; align-items: center; gap: 16px; }
+.range-disp { font-family: 'Barlow Condensed', sans-serif; font-size: 1.9rem; font-weight: 900; color: var(--red); min-width: 76px; }
+input[type=range] { flex: 1; -webkit-appearance: none; height: 2px; background: rgba(23,20,16,0.15); outline: none; cursor: pointer; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%; background: var(--red); cursor: pointer; }
+.c-select { width: 100%; font-family: 'Courier Prime', monospace; font-size: .9rem; color: var(--ink); background: transparent; border: none; border-bottom: 2px solid var(--ink); padding: 9px 0; outline: none; cursor: pointer; transition: border-color .2s; -webkit-appearance: none; }
+.c-select:focus { border-color: var(--red); }
+.calc-btn { font-family: 'Barlow Condensed', sans-serif; font-size: .78rem; font-weight: 900; letter-spacing: .2em; text-transform: uppercase; color: var(--paper); background: var(--red); padding: 15px 30px; border: none; cursor: pointer; transition: background .2s; margin-top: 8px; }
+.calc-btn:hover { background: #8A1A0A; }
+.co-idle { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; text-align: center; color: var(--ink-dim); gap: 12px; }
+.co-idle-icon { font-size: 2.8rem; opacity: .2; }
+.co-idle-txt { font-size: .72rem; letter-spacing: .1em; }
+.co-computing { display: none; align-items: center; justify-content: center; min-height: 300px; }
+.co-computing.show { display: flex; }
+.computing-txt { font-family: 'Courier Prime', monospace; font-size: .82rem; color: var(--ink-dim); letter-spacing: .08em; }
+.co-result { display: none; }
+.co-result.show { display: block; }
+.co-rhead { font-size: .58rem; letter-spacing: .24em; text-transform: uppercase; color: var(--sepia); border-bottom: 1px solid var(--sepia); padding-bottom: 12px; margin-bottom: 24px; }
+.co-met { padding: 14px 0; border-bottom: 1px dashed rgba(23,20,16,0.12); }
+.co-met:last-of-type { border-bottom: none; }
+.co-met-l { font-size: .56rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 4px; }
+.co-met-v { font-family: 'Barlow Condensed', sans-serif; font-size: 1.75rem; font-weight: 900; line-height: 1; color: var(--ink); }
+.co-met-v.g { color: var(--green); }
+.co-met-v.r { color: var(--red); }
+.co-note { margin-top: 18px; font-size: .7rem; line-height: 1.65; color: var(--ink-dim); font-style: italic; }
+
+/* ── MATRIX ── */
+#matrix { background: var(--paper3); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
+.mgrid { display: grid; grid-template-columns: repeat(5,1fr); border-left: 1px solid var(--ink); }
+.mhead { grid-column:1/-1; padding: 16px 20px; border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink); background: var(--ink); }
+.mhead-t { font-family: 'Barlow Condensed', sans-serif; font-size: .7rem; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; color: var(--paper); }
+.mcell { padding: 26px 18px; border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink); cursor: default; transition: background .22s; }
+.mcell:hover { background: var(--ink); }
+.mcell:hover .mc-t { color: var(--paper); }
+.mcell:hover .mc-l { color: var(--red); }
+.mcell:hover .mc-i { color: rgba(234,227,211,0.25); }
+.mc-i { font-size: .52rem; letter-spacing: .2em; color: var(--ink-dim); margin-bottom: 9px; transition: color .22s; }
+.mc-t { font-family: 'Barlow Condensed', sans-serif; font-size: .9rem; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; line-height: 1.2; color: var(--ink); transition: color .22s; }
+.mc-l { font-size: .58rem; letter-spacing: .12em; text-transform: uppercase; color: var(--sepia); margin-top: 7px; transition: color .22s; }
+
+/* ── EDUCATION ── */
+#edu { background: var(--paper2); border-top: 2px solid var(--ink); }
+.edu-card { display: grid; grid-template-columns: 160px 1fr auto; border: 2px solid var(--ink); }
+.edu-yr { background: var(--ink); color: var(--paper); writing-mode: vertical-rl; display: flex; align-items: center; justify-content: center; padding: 28px 24px; font-family: 'Barlow Condensed', sans-serif; font-size: 2.8rem; font-weight: 900; }
+.edu-main { padding: 32px 40px; border-right: 1px solid rgba(23,20,16,0.12); }
+.edu-deg { font-family: 'Barlow Condensed', sans-serif; font-size: 1.6rem; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 5px; }
+.edu-uni { font-family: 'Libre Baskerville', serif; font-size: .9rem; font-style: italic; color: var(--ink-mid); margin-bottom: 4px; }
+.edu-loc { font-size: .72rem; color: var(--ink-dim); }
+.edu-langs { padding: 32px 40px; display: flex; flex-direction: column; justify-content: center; gap: 13px; }
+.lr { display: flex; align-items: center; gap: 16px; }
+.lr-n { font-family: 'Barlow Condensed', sans-serif; font-size: .82rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; min-width: 76px; }
+.lr-bar { flex: 1; height: 2px; background: rgba(23,20,16,0.1); }
+.lr-fill { height: 100%; background: var(--red); }
+.lr-l { font-size: .56rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-dim); min-width: 80px; text-align: right; }
+
+/* ── CONTACT ── */
+#contact { background: var(--paper); border-top: 2px solid var(--ink); }
+.contact-grid { display: grid; grid-template-columns: 1fr 420px; border: 2px solid var(--ink); }
+.contact-l { padding: 72px 56px; border-right: 2px solid var(--ink); }
+.contact-h { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(3rem,7vw,6.5rem); font-weight: 900; line-height: .9; text-transform: uppercase; margin-bottom: 32px; }
+.contact-h em { font-family: 'Libre Baskerville', serif; font-style: italic; font-weight: 400; text-transform: none; color: var(--red); font-size: .88em; display: block; }
+.contact-body { font-size: .87rem; line-height: 1.8; color: var(--ink-mid); max-width: 400px; margin-bottom: 36px; }
+.contact-r { padding: 56px 44px; background: var(--paper2); display: flex; flex-direction: column; }
+.cr-head { font-size: .58rem; letter-spacing: .26em; text-transform: uppercase; color: var(--sepia); border-bottom: 1px solid var(--sepia); padding-bottom: 12px; margin-bottom: 24px; }
+.citem { display: flex; align-items: center; gap: 16px; padding: 17px 0; border-bottom: 1px dashed rgba(23,20,16,0.12); text-decoration: none; color: var(--ink); transition: transform .2s; }
+.citem:last-child { border-bottom: none; }
+.citem:hover { transform: translateX(5px); }
+.citem-i { font-size: 1rem; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(23,20,16,0.18); flex-shrink: 0; }
+.ci-l { font-size: .54rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-dim); margin-bottom: 3px; }
+.ci-v { font-family: 'Barlow Condensed', sans-serif; font-size: .92rem; font-weight: 700; letter-spacing: .04em; }
+
+/* ── FOOTER ── */
+footer { background: var(--ink); padding: 26px 60px; display: flex; justify-content: space-between; align-items: center; }
+.ft-l { font-family: 'Barlow Condensed', sans-serif; font-size: .72rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--paper); display: flex; align-items: center; gap: 18px; }
+.ft-l::before { content: 'SS'; font-size: .9rem; font-weight: 900; color: var(--red); border: 2px solid var(--red); padding: 2px 7px; }
+.ft-r { font-size: .58rem; letter-spacing: .14em; text-transform: uppercase; color: rgba(234,227,211,0.22); }
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px) {
+  #hero { grid-template-columns: 1fr; }
+  .hero-r { border-top: 2px solid var(--ink); }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .mgrid { grid-template-columns: repeat(3,1fr); }
+  .about-grid { grid-template-columns: 1fr; }
+  .about-l { border-right: none; border-bottom: 2px solid var(--ink); }
+  .contact-grid { grid-template-columns: 1fr; }
+  .contact-r { border-top: 2px solid var(--ink); }
+  .edu-card { grid-template-columns: 1fr; }
+  .edu-yr { writing-mode: horizontal-tb; font-size: 2.2rem; padding: 18px 24px; }
+  .edu-langs { display: none; }
+  .calc-body { grid-template-columns: 1fr; }
+  .calc-in { border-right: none; border-bottom: 2px solid var(--ink); }
+}
+@media(max-width:768px) {
+  nav { padding: 0 18px; }
+  .nav-id, .nav-links { display: none; }
+  .nav-burger { display: flex; }
+  .si { padding: 64px 22px; }
+  .hero-l { padding: 36px 22px; }
+  .hero-r { padding: 36px 22px; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .mgrid { grid-template-columns: repeat(2,1fr); }
+  .about-l, .about-r { padding: 36px 22px; }
+  .contact-l { padding: 48px 22px; }
+  .contact-r { padding: 36px 22px; }
+  .cfile { grid-template-columns: 1fr; }
+  .cf-meta { border-right: none; border-bottom: 2px solid var(--ink); }
+  footer { flex-direction: column; gap: 10px; padding: 20px 22px; text-align: center; }
+  #status-pill { bottom: 16px; right: 14px; font-size: .58rem; }
+}
+</style>
+</head>
+<body>
+
+<div id="pgbar"></div>
+<div id="status-pill"><div class="s-dot"></div>HUNGRY. AVAILABLE. LET'S TALK.</div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="ld-ref">WARNING: THIS PORTFOLIO WILL MAKE YOU WANT TO HIRE HIM</div>
+  <div class="ld-stamp">CLOSED-WON</div>
+  <div class="ld-sub">5 years. 3 territories. ₹1.8Cr+. Loading the receipts…</div>
+</div>
+
+<!-- MOBILE MENU -->
+<div id="mm">
+  <div class="mm-x" id="mm-x">✕ SHUT THE FILE</div>
+  <div class="mm-meta">YOU'RE READING THE DOSSIER OF SAGNIK SARKAR</div>
+  <ul class="mm-links">
+    <li><a href="#about">Wait, Who Is This?</a></li>
+    <li><a href="#cases">The Proof</a></li>
+    <li><a href="#calc">Show Me The Money</a></li>
+    <li><a href="#matrix">The Full Arsenal</a></li>
+    <li><a href="#contact">Let's Talk</a></li>
+  </ul>
+  <div class="mm-foot"><a href="/cdn-cgi/l/email-protection#90e3e3f1f7fef9fba1a9a9a7d0f7fdf1f9fcbef3fffd"><span class="__cf_email__" data-cfemail="32414153555c5b59030b0b0572555f535b5e1c515d5f">[email&#160;protected]</span></a> &nbsp;·&nbsp; <a href="tel:+918017308577">+91 80173 08577</a></div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-id"><strong>DOSSIER</strong><span>Sagnik Sarkar — The Sales Guy Who Actually Delivers</span></div>
+  <ul class="nav-links">
+    <li><a href="#about">Who Is This?</a></li>
+    <li><a href="#cases">The Receipts</a></li>
+    <li><a href="#calc">Show Me Numbers</a></li>
+    <li><a href="#matrix">The Arsenal</a></li>
+    <li><a href="#contact">Hire Me</a></li>
+    <li class="nav-dl"><a href="Sarkar_Sagnik_Resume_Sales.pdf" download>↓ Grab Resume</a></li>
+    <li class="nav-cta"><a href="/cdn-cgi/l/email-protection#92e1e1f3f5fcfbf9a3ababa5d2f5fff3fbfebcf1fdff">Let's Talk Revenue →</a></li>
+  </ul>
+  <div class="nav-burger" id="nav-burger">[OPEN DOSSIER]</div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-l">
+    <div class="hero-tag">Five Years. Three Territories. Zero Excuses.</div>
+    <div class="hero-name">
+      <div class="hero-first" id="hfirst"><span class="tw-cursor" id="twc">|</span></div>
+      <div class="hero-last" id="hlast">Sarkar.</div>
+      <div class="hero-strip" id="hstrip">The Engineer Who Learned to Close C-Suite. Repeatedly.</div>
+    </div>
+    <div class="hero-foot" id="hfoot">
+      <div><div class="hf-lbl">Where I Hunt</div><div class="hf-val">East India · NE India · Bangladesh</div></div>
+      <div><div class="hf-lbl">Right Now</div><div class="hf-val" style="color:var(--red)">⬤ Open. Very Open.</div></div>
+      <div><div class="hf-lbl">Time in the Field</div><div class="hf-val">~5 Years, No Losses</div></div>
+    </div>
+  </div>
+  <div class="hero-r" id="heror">
+    <div class="dos-head">The Short Version. For Busy Hiring Managers.</div>
+    <div class="dos-row"><div class="dos-lbl">What You'd Be Getting</div><div class="dos-val hi">A Senior Closer Who Builds From Zero</div></div>
+    <div class="dos-row"><div class="dos-lbl">Stomping Grounds</div><div class="dos-val">CAE / Simulation · Industrial HVAC · Power Equipment</div></div>
+    <div class="dos-row"><div class="dos-lbl">How I Actually Sell</div><div class="dos-val">MEDDIC · SPIN Selling · Value-Based — Not Vibes</div></div>
+    <hr class="dos-div"/>
+    <div class="dos-row"><div class="dos-lbl">What I've Brought In</div><div class="dos-val hi">₹1.8Cr+ and counting.</div></div>
+    <div class="dos-row"><div class="dos-lbl">How Often I Hit Target</div><div class="dos-val">110%+. Every. Quarter.</div></div>
+    <div class="dos-row"><div class="dos-lbl">Can He Forecast?</div><div class="dos-val">&gt;85% QoQ. Yes. He Can.</div></div>
+    <div class="dos-stamp">CLOSED<br/>WON</div>
+    <hr class="dos-div"/>
+    <div class="hero-contacts">
+      <a class="hc-link" href="/cdn-cgi/l/email-protection#691a1a080e0700025850505e290e04080005470a0604">✉ <span class="__cf_email__" data-cfemail="83f0f0e2e4edeae8b2babab4c3e4eee2eaefade0ecee">[email&#160;protected]</span></a>
+      <a class="hc-link" href="tel:+918017308577">☎ +91 80173 08577</a>
+      <a class="hc-link" href="https://www.linkedin.com/in/sagnik-s-8971a51ab" target="_blank">⬡ Stalk Me On LinkedIn</a>
+    </div>
+    <a class="dl-btn" href="Sarkar_Sagnik_Resume_Sales.pdf" download>
+      <svg viewBox="0 0 24 24"><path d="M12 16l-6-6h4V4h4v6h4l-6 6zm-8 4v-2h16v2H4z"/></svg>
+      Grab The Full Resume
+    </a>
+  </div>
+</section>
+
+<!-- DEALS TICKER -->
+<div class="ticker-deals"><div class="td-inner" id="td-inner"></div></div>
+
+<!-- SKILLS TICKER -->
+<div class="ticker-skills">
+  <div class="ts-inner">
+    <span class="ts ts-r">▶</span>
+    <span class="ts">MEDDIC. Not Optional.</span><span class="ts-sep"> · </span><span class="ts">110% Quota. Every Quarter.</span><span class="ts-sep"> · </span><span class="ts">C-Suite? Comfortable.</span><span class="ts-sep"> · </span><span class="ts">₹1.8Cr+ Generated</span><span class="ts-sep"> · </span><span class="ts">Territories Built from Scratch</span><span class="ts-sep"> · </span><span class="ts">55% Demo → PO. Industry avg is 30%.</span><span class="ts-sep"> · </span><span class="ts">ANSYS · CAE · SaaS · HVAC · Power</span><span class="ts-sep"> · </span><span class="ts">Salesforce. HubSpot. Both.</span><span class="ts-sep"> · </span>
+    <span class="ts ts-r">▶</span>
+    <span class="ts">MEDDIC. Not Optional.</span><span class="ts-sep"> · </span><span class="ts">110% Quota. Every Quarter.</span><span class="ts-sep"> · </span><span class="ts">C-Suite? Comfortable.</span><span class="ts-sep"> · </span><span class="ts">₹1.8Cr+ Generated</span><span class="ts-sep"> · </span><span class="ts">Territories Built from Scratch</span><span class="ts-sep"> · </span><span class="ts">55% Demo → PO. Industry avg is 30%.</span><span class="ts-sep"> · </span><span class="ts">ANSYS · CAE · SaaS · HVAC · Power</span><span class="ts-sep"> · </span><span class="ts">Salesforce. HubSpot. Both.</span><span class="ts-sep"> · </span>
+  </div>
+</div>
+
+<!-- STATS -->
+<div id="stats">
+  <div class="stats-grid">
+    <div class="stat-cell"><div class="sc-idx">THE QUOTA NUMBER</div><div class="sc-num"><span class="counter" data-to="110">0</span><span class="acc">%+</span></div><div class="sc-lbl">Not once. Not sometimes. Every single quarter, across every role.</div></div>
+    <div class="stat-cell"><div class="sc-idx">TOTAL BROUGHT IN</div><div class="sc-num"><span class="acc">₹</span>1.8<span class="acc">Cr+</span></div><div class="sc-lbl">Generated personally. Cold starts, warm markets, all of it.</div></div>
+    <div class="stat-cell"><div class="sc-idx">DEMO → DEAL RATE</div><div class="sc-num"><span class="counter" data-to="55">0</span><span class="acc">%</span></div><div class="sc-lbl">Industry average is ~30%. Let that sink in for a moment.</div></div>
+    <div class="stat-cell"><div class="sc-idx">FORECAST ACCURACY</div><div class="sc-num">&gt;<span class="counter" data-to="85">0</span><span class="acc">%</span></div><div class="sc-lbl">Called it right, every quarter. After implementing MEDDIC.</div></div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="si">
+    <div class="s-brow reveal"><span class="s-brow-n">—</span> Okay, But Who Actually Is This Guy</div>
+    <h2 class="s-h reveal">Mechanical Engineer.<br/><em>Sales Machine.</em><br/>Your Next Hire.</h2>
+    <div class="about-grid reveal">
+      <div class="about-l">
+        <div class="about-quote">"I don't walk into a room to pitch. I walk in having already mapped the power, found the pain, and rehearsed the close. The pitch is just confirmation."</div>
+        <p class="redact-tip">Some intel is classified. <span>Hover to declassify ↗</span></p>
+        <div class="about-body">
+          <p>Here's the honest story: I went to engineering school, graduated with a mechanical engineering degree, and then made a deliberate, eyes-open pivot into enterprise sales. Not because I couldn't code — <strong>because I realised the real leverage was in the room where the budget decisions happen.</strong></p>
+          <p>Five years on, I've built territories from absolute zero across East India, Northeast India, and Bangladesh. Closed CAE simulation deals averaging <span class="rx" data-t="₹25–40L">████████</span> a pop. Hit <span class="rx" data-t="₹1.2Cr+">████████</span> at Kruger in just 14 months. Launched a BD vertical that pulled in <span class="rx" data-t="₹60L first-year">████████████████</span> from a cold start. No inherited pipeline. No warm handoffs.</p>
+          <p>My edge is being bilingual in both worlds — <strong>credible in an engineering room at 9am, dangerous in a boardroom at 3pm.</strong> I introduced MEDDIC to my whole regional team, slashed cycles by <span class="rx" data-t="~20%">████</span>, and coached my juniors to <span class="rx" data-t="110%+ quota">██████████</span> while hitting the same myself. That's not a coincidence. That's a system.</p>
+        </div>
+      </div>
+      <div class="about-r">
+        <div class="ar-lbl">The Stats You Actually Care About</div>
+        <div>
+          <div class="pf"><div class="pf-k">Where I'm Based</div><div class="pf-v">Kolkata, West Bengal, India</div></div>
+          <div class="pf"><div class="pf-k">Industries I've Cracked</div><div class="pf-v">CAE / SaaS · Industrial HVAC · Power Equipment</div></div>
+          <div class="pf"><div class="pf-k">How I Sell (For Real)</div><div class="pf-v">MEDDIC · SPIN · Value-Based — Zero fluff</div></div>
+          <div class="pf"><div class="pf-k">CRM I Won't Complain About</div><div class="pf-v">Salesforce · HubSpot — Both, no problem</div></div>
+          <div class="pf"><div class="pf-k">Average Deal I've Closed</div><div class="pf-v">₹25L – ₹40L per enterprise engagement</div></div>
+          <div class="pf"><div class="pf-k">Languages in My Bag</div><div class="pf-v">Bengali · English · Hindi</div></div>
+        </div>
+        <div class="ar-ctas">
+          <a href="/cdn-cgi/l/email-protection#20535341474e494b1119191760474d41494c0e434f4d" class="btn-red">Yeah, Let's Talk →</a>
+          <a href="https://www.linkedin.com/in/sagnik-s-8971a51ab" target="_blank" class="btn-ink">Stalk LinkedIn</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CASE FILES -->
+<section id="cases">
+  <div class="si">
+    <div class="s-brow reveal"><span class="s-brow-n">—</span> You Want Proof. Here It Is.</div>
+    <h2 class="s-h reveal">Three Jobs.<br/>Every Single One<br/><em>Closed-Won.</em></h2>
+    <div class="drag-hint reveal"><span class="drag-arrow">→</span> Drag through the files — each one's a different story, same ending</div>
+    <div class="htrack reveal" id="htrack">
+      <div class="hinner">
+        <!-- CF-001 -->
+        <div class="cfile">
+          <div class="cf-meta">
+            <div class="cf-num">THE MOST TECHNICAL SELL</div>
+            <div class="cf-date">Mar 2024 – Oct 2025</div>
+            <div class="cf-co">CADFEM India<br/>(ANSYS Elite Channel Partner)</div>
+            <div class="cf-loc">Kolkata, West Bengal</div>
+            <div class="cf-verdict">Mission: Accomplished</div>
+            <div class="cf-tags"><span class="cf-tag">CAE Software</span><span class="cf-tag">MEDDIC</span><span class="cf-tag">Enterprise</span><span class="cf-tag">SaaS ARR</span></div>
+          </div>
+          <div class="cf-body">
+            <div class="cf-role">Account Manager — Enterprise &amp; Institutional Sales</div>
+            <ul class="cf-wins">
+              <li><span class="blt">→</span><span>Took a <strong>near-zero territory</strong> (East India + NE India + Bangladesh) and hit <strong>110%+ quota every quarter</strong> through CRM-driven pipeline and relentless demand generation.</span></li>
+              <li><span class="blt">→</span><span>Closed simulation software deals averaging <strong>₹25–40L each</strong> — by walking into C-suite rooms and making complex engineering ROI feel obvious. 30+ enterprise accounts. All built.</span></li>
+              <li><span class="blt">→</span><span>Rolled out <strong>MEDDIC across the regional team</strong> — cycles dropped ~20%, forecast accuracy crossed 85% QoQ. Nobody missed quota anymore.</span></li>
+              <li><span class="blt">→</span><span>Locked in <strong>3 multi-year institutional licensing deals</strong> — recurring ARR across East India's top engineering universities. They keep renewing.</span></li>
+              <li><span class="blt">→</span><span>Coached 2 junior reps from ramping to <strong>110%+ quota</strong>. Deal reviews, stakeholder mapping, the works. They're closing now.</span></li>
+            </ul>
+          </div>
+        </div>
+        <!-- CF-002 -->
+        <div class="cfile">
+          <div class="cf-meta">
+            <div class="cf-num">THE REVENUE SPRINT</div>
+            <div class="cf-date">Jan 2023 – Feb 2024</div>
+            <div class="cf-co">Kruger Ventilation Industries (India) Pvt. Ltd.</div>
+            <div class="cf-loc">Kolkata, West Bengal</div>
+            <div class="cf-verdict">₹1.2Cr in 14 Months</div>
+            <div class="cf-tags"><span class="cf-tag">Industrial HVAC</span><span class="cf-tag">Technical Sales</span><span class="cf-tag">Pipeline Build</span></div>
+          </div>
+          <div class="cf-body">
+            <div class="cf-role">Application Engineer — Sales</div>
+            <ul class="cf-wins">
+              <li><span class="blt">→</span><span><strong>₹1.2Cr+ closed in 14 months</strong> — industrial HVAC solutions across manufacturing and infrastructure. Built a 50+ account pipeline from nothing.</span></li>
+              <li><span class="blt">→</span><span>Ran <strong>25+ technical site assessments</strong> myself — designed ventilation systems that cut client energy costs by <strong>15–25%</strong>. That's the ROI story that closes the deal.</span></li>
+              <li><span class="blt">→</span><span>Owned the <strong>full cycle: cold call to post-installation sign-off</strong> — 92% on-time fulfilment. My pipeline hygiene never lied.</span></li>
+              <li><span class="blt">→</span><span>Kept <strong>100% of key accounts</strong>. Three came back for repeat orders. Two sent referrals. That's what post-sales culture looks like.</span></li>
+            </ul>
+          </div>
+        </div>
+        <!-- CF-003 -->
+        <div class="cfile">
+          <div class="cf-meta">
+            <div class="cf-num">THE COLD START</div>
+            <div class="cf-date">Oct 2021 – Dec 2022</div>
+            <div class="cf-co">SAPS Power Equipments Pvt. Ltd.</div>
+            <div class="cf-loc">Kolkata, West Bengal</div>
+            <div class="cf-verdict">₹60L. Year One. Cold.</div>
+            <div class="cf-tags"><span class="cf-tag">Power Sector</span><span class="cf-tag">BD Vertical</span><span class="cf-tag">Zero Coverage</span></div>
+          </div>
+          <div class="cf-body">
+            <div class="cf-role">Technical Service &amp; Sales Engineer</div>
+            <ul class="cf-wins">
+              <li><span class="blt">→</span><span>Launched a <strong>brand new BD vertical from scratch</strong> — zero prior coverage, zero warm leads. Generated <strong>₹60L+ in year one</strong> through sheer territory work.</span></li>
+              <li><span class="blt">→</span><span>Walked through <strong>15+ power plants</strong> doing on-site audits. Found the problems. Recommended the fixes. Three anchor accounts saw real uptime improvement.</span></li>
+              <li><span class="blt">→</span><span>Built a <strong>40-account network</strong> of plant engineers and procurement heads — SAPS went from unknown to preferred supplier in East India's power sector.</span></li>
+              <li><span class="blt">→</span><span>Converted <strong>55% of demos into purchase orders</strong> in under 60 days. The industry benchmark is ~30%. That gap is the value-based selling doing its job.</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="hpad"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEAL CALCULATOR -->
+<section id="calc">
+  <div class="si">
+    <div class="s-brow reveal"><span class="s-brow-n">—</span> Curious What I'd Do With Your Pipeline?</div>
+    <h2 class="s-h reveal">Let's Run<br/>Your <em>Numbers.</em></h2>
+    <div class="calc-box reveal">
+      <div class="calc-top">
+        <div class="calc-top-t">Deal Projection Engine — Built on 5 Years of Real Closed-Won Data</div>
+        <div class="calc-top-r">NOT A GUESS. THESE ARE MY ACTUAL BENCHMARKS.</div>
+      </div>
+      <div class="calc-body">
+        <div class="calc-in">
+          <div class="cf-field">
+            <label class="cf-lbl">Deal Size (₹ Lakhs) — Pick your number</label>
+            <div class="range-row">
+              <input type="range" id="rsize" min="5" max="100" value="30" step="1"/>
+              <div class="range-disp">₹<span id="rsize-v">30</span>L</div>
+            </div>
+          </div>
+          <div class="cf-field">
+            <label class="cf-lbl">Territory — Where's the deal?</label>
+            <select class="c-select" id="sel-ter">
+              <option value="east">East India (My Home Turf)</option>
+              <option value="ne">Northeast India</option>
+              <option value="bangladesh">Bangladesh</option>
+              <option value="national">Pan-India / National</option>
+            </select>
+          </div>
+          <div class="cf-field">
+            <label class="cf-lbl">What Are You Selling?</label>
+            <select class="c-select" id="sel-prod">
+              <option value="cae">CAE / Simulation Software (ANSYS)</option>
+              <option value="hvac">Industrial HVAC / Ventilation</option>
+              <option value="power">Power Equipment (Valves / Pumps)</option>
+              <option value="saas">Enterprise SaaS</option>
+            </select>
+          </div>
+          <div class="cf-field">
+            <label class="cf-lbl">What Kind of Engagement?</label>
+            <select class="c-select" id="sel-type">
+              <option value="new">New Logo — Cold Acquisition</option>
+              <option value="expansion">Expansion / Upsell</option>
+              <option value="renewal">Multi-Year Renewal</option>
+            </select>
+          </div>
+          <button class="calc-btn" id="run-calc">▶ SHOW ME WHAT SAGNIK WOULD DO</button>
+        </div>
+        <div class="calc-out" id="calc-out">
+          <div class="co-idle" id="co-idle">
+            <div class="co-idle-icon">◈</div>
+            <div class="co-idle-txt">Set your deal parameters and fire it up.</div>
+          </div>
+          <div class="co-computing" id="co-comp"><div class="computing-txt" id="comp-txt">Computing…</div></div>
+          <div class="co-result" id="co-res">
+            <div class="co-rhead">PROJECTION — BASED ON SAGNIK'S ACTUAL FIELD BENCHMARKS</div>
+            <div class="co-met"><div class="co-met-l">Win Probability (Sagnik Running Point)</div><div class="co-met-v" id="r-win">—</div></div>
+            <div class="co-met"><div class="co-met-l">Expected Time to Close</div><div class="co-met-v" id="r-time">—</div></div>
+            <div class="co-met"><div class="co-met-l">Projected 3-Year ARR</div><div class="co-met-v" id="r-arr">—</div></div>
+            <div class="co-met"><div class="co-met-l">Deal Complexity Level</div><div class="co-met-v" id="r-cplx">—</div></div>
+            <div class="co-note" id="r-note">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MATRIX -->
+<section id="matrix">
+  <div class="si">
+    <div class="s-brow reveal"><span class="s-brow-n">—</span> Everything I Bring to Every Deal. Every Time.</div>
+    <h2 class="s-h reveal">The Full Arsenal.<br/><em>No Fluff.</em></h2>
+    <div class="mgrid reveal">
+      <div class="mhead"><div class="mhead-t">15 Weapons. All Battle-Tested. Hover to claim one.</div></div>
+      <div class="mcell"><div class="mc-i">C·01</div><div class="mc-t">MEDDIC / SPIN</div><div class="mc-l">My Primary Weapon</div></div>
+      <div class="mcell"><div class="mc-i">C·02</div><div class="mc-t">Enterprise B2B</div><div class="mc-l">Core Discipline</div></div>
+      <div class="mcell"><div class="mc-i">C·03</div><div class="mc-t">C-Suite Close</div><div class="mc-l">Boardroom Native</div></div>
+      <div class="mcell"><div class="mc-i">C·04</div><div class="mc-t">Account Retention</div><div class="mc-l">100% Key Account Hold</div></div>
+      <div class="mcell"><div class="mc-i">C·05</div><div class="mc-t">Territory from Zero</div><div class="mc-l">Three Times Over</div></div>
+      <div class="mcell"><div class="mc-i">C·06</div><div class="mc-t">Pipeline Development</div><div class="mc-l">50+ Account Networks</div></div>
+      <div class="mcell"><div class="mc-i">C·07</div><div class="mc-t">Technical Pre-Sales</div><div class="mc-l">Engineer + Closer Hybrid</div></div>
+      <div class="mcell"><div class="mc-i">C·08</div><div class="mc-t">ARR / MRR Growth</div><div class="mc-l">Multi-Year Deals Locked</div></div>
+      <div class="mcell"><div class="mc-i">C·09</div><div class="mc-t">CAE / ANSYS</div><div class="mc-l">Complex Software Sold</div></div>
+      <div class="mcell"><div class="mc-i">C·10</div><div class="mc-t">Value-Based Selling</div><div class="mc-l">ROI is the Pitch</div></div>
+      <div class="mcell"><div class="mc-i">C·11</div><div class="mc-t">Salesforce / HubSpot</div><div class="mc-l">Pipeline Never Lies</div></div>
+      <div class="mcell"><div class="mc-i">C·12</div><div class="mc-t">Team Coaching</div><div class="mc-l">2 JRs → 110% Quota</div></div>
+      <div class="mcell"><div class="mc-i">C·13</div><div class="mc-t">Channel Partners</div><div class="mc-l">Elite Partner Networks</div></div>
+      <div class="mcell"><div class="mc-i">C·14</div><div class="mc-t">Industrial / IoT</div><div class="mc-l">Power + Mfg Sectors</div></div>
+      <div class="mcell"><div class="mc-i">C·15</div><div class="mc-t">SaaS Sales</div><div class="mc-l">Recurring Revenue Model</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- EDUCATION -->
+<section id="edu">
+  <div class="si">
+    <div class="s-brow reveal"><span class="s-brow-n">—</span> Where It All Started</div>
+    <h2 class="s-h reveal">Engineering school gave me<br/>the brain. <em>Sales gave<br/>me the edge.</em></h2>
+    <div class="edu-card reveal">
+      <div class="edu-yr">2020</div>
+      <div class="edu-main">
+        <div class="edu-deg">B.Tech — Mechanical Engineering</div>
+        <div class="edu-uni">Budge Budge Institute of Technology (MAKAUT)</div>
+        <div class="edu-loc">West Bengal, India · 2016 – 2020 · The foundation of everything that came after.</div>
+      </div>
+      <div class="edu-langs">
+        <div class="lr"><div class="lr-n">Bengali</div><div class="lr-bar"><div class="lr-fill" style="width:100%"></div></div><div class="lr-l">Born With It</div></div>
+        <div class="lr"><div class="lr-n">English</div><div class="lr-bar"><div class="lr-fill" style="width:80%"></div></div><div class="lr-l">Boardroom Ready</div></div>
+        <div class="lr"><div class="lr-n">Hindi</div><div class="lr-bar"><div class="lr-fill" style="width:80%"></div></div><div class="lr-l">Full Professional</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="si">
+    <div class="s-brow reveal"><span class="s-brow-n">—</span> Still Reading? Then You Already Know.</div>
+    <div class="contact-grid reveal">
+      <div class="contact-l">
+        <h2 class="contact-h">If You've Got<br/>A Territory<br/><em>I'll Own It.</em></h2>
+        <p class="contact-body">Looking for someone to build pipeline from zero, close enterprise deals that other reps won't touch, or lead a regional team to actually hit quota? Let's cut straight to it — I'm available, motivated, and I already know what 110% feels like.</p>
+        <a href="/cdn-cgi/l/email-protection#6615150701080f0d575f5f5126010b070f0a4805090b" class="btn-red">Send Me a Brief →</a>
+      </div>
+      <div class="contact-r">
+        <div class="cr-head">How To Reach The Man Himself</div>
+        <a class="citem" href="/cdn-cgi/l/email-protection#fa89899b9d949391cbc3c3cdba9d979b9396d4999597"><div class="citem-i">✉</div><div><div class="ci-l">Email — Fastest</div><div class="ci-v"><span class="__cf_email__" data-cfemail="52212133353c3b39636b6b6512353f333b3e7c313d3f">[email&#160;protected]</span></div></div></a>
+        <a class="citem" href="tel:+918017308577"><div class="citem-i">☎</div><div><div class="ci-l">Call — Even Faster</div><div class="ci-v">+91 80173 08577</div></div></a>
+        <a class="citem" href="https://www.linkedin.com/in/sagnik-s-8971a51ab" target="_blank"><div class="citem-i">⬡</div><div><div class="ci-l">LinkedIn — Go Ahead, Stalk Me</div><div class="ci-v">linkedin.com/in/sagnik-s-8971a51ab</div></div></a>
+        <div class="citem"><div class="citem-i">↳</div><div><div class="ci-l">Where I'm Based</div><div class="ci-v">Kolkata, West Bengal — Ready to Travel</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="ft-l">Sagnik Sarkar — Built Three Territories. Closed All of Them.</div>
+  <div class="ft-r">© 2025 · CONFIDENTIAL DOSSIER · IF YOU'RE READING THIS, HIRE HIM.</div>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+/* LOADER + TYPEWRITER */
+window.addEventListener('load', () => {
+  const loader = document.getElementById('loader');
+  loader.classList.add('hide');
+  setTimeout(() => { loader.style.display = 'none'; typeHero(); }, 2250);
+});
+function typeHero() {
+  const el = document.getElementById('hfirst');
+  const cursor = document.getElementById('twc');
+  const chars = 'SAGNIK'.split('');
+  let i = 0;
+  function next() {
+    if (i < chars.length) {
+      const s = document.createElement('span'); s.textContent = chars[i++];
+      el.insertBefore(s, cursor);
+      setTimeout(next, 85 + Math.random() * 50);
+    } else {
+      setTimeout(() => {
+        cursor.classList.add('done');
+        document.getElementById('hlast').classList.add('on');
+        setTimeout(() => {
+          document.getElementById('hstrip').classList.add('on');
+          document.getElementById('hfoot').classList.add('on');
+          document.getElementById('heror').classList.add('on');
+        }, 280);
+      }, 450);
+    }
+  }
+  next();
+}
+
+/* PROGRESS BAR */
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) * 100;
+  document.getElementById('pgbar').style.width = pct + '%';
+});
+
+/* MOBILE MENU */
+document.getElementById('nav-burger').addEventListener('click', () => document.getElementById('mm').classList.add('open'));
+document.getElementById('mm-x').addEventListener('click', () => document.getElementById('mm').classList.remove('open'));
+document.querySelectorAll('#mm .mm-links a').forEach(a => a.addEventListener('click', () => document.getElementById('mm').classList.remove('open')));
+
+/* DEALS TICKER */
+const deals = [
+  ['CF-0031','ANSYS Structural License','₹38L','CADFEM India'],
+  ['CF-0028','Industrial HVAC System','₹14L','Kruger Ventilation'],
+  ['CF-0019','Power Plant Valve Package','₹8.5L','SAPS Power'],
+  ['CF-0042','Multi-Year ANSYS License','₹72L','NIT Durgapur'],
+  ['CF-0035','Simulation Cluster Suite','₹45L','Tata Steel R&D'],
+  ['CF-0011','Metro Ventilation System','₹22L','L&T Infrastructure'],
+  ['CF-0026','ANSYS Fluids Package','₹31L','ONGC Engineering'],
+  ['CF-0007','Pump Filtration Package','₹6.2L','DVC Power Plant'],
+];
+const inner = document.getElementById('td-inner');
+let html = '';
+[...deals,...deals].forEach(d => {
+  html += `<span class="td">${d[0]}</span><span class="td-sep"> · </span><span class="td">${d[1]}</span><span class="td-sep"> · </span><span class="td">${d[2]}</span><span class="td-sep"> · </span><span class="td">${d[3]}</span><span class="td-sep"> · </span><span class="td td-won">CLOSED-WON ✓</span><span class="td-sep">&nbsp;&nbsp;&nbsp;&nbsp;</span>`;
+});
+inner.innerHTML = html;
+
+/* REVEALS */
+const ro = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('on'); ro.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+const so = new IntersectionObserver(entries => {
+  entries.forEach((e,i) => { if(e.isIntersecting){ setTimeout(()=>e.target.classList.add('on'),i*110); so.unobserve(e.target); } });
+}, { threshold: 0.15 });
+document.querySelectorAll('.stat-cell').forEach(el => so.observe(el));
+
+/* COUNTERS */
+const co = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    const el = e.target, target = +el.dataset.to, step = target/60;
+    let v = 0;
+    const t = setInterval(()=>{ v=Math.min(v+step,target); el.textContent=Math.floor(v); if(v>=target)clearInterval(t); },16);
+    co.unobserve(el);
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('.counter').forEach(el => co.observe(el));
+
+/* HORIZONTAL DRAG */
+const track = document.getElementById('htrack');
+let isDown=false, sx, sl;
+track.addEventListener('mousedown', e => { isDown=true; sx=e.pageX-track.offsetLeft; sl=track.scrollLeft; });
+['mouseleave','mouseup'].forEach(ev => track.addEventListener(ev, ()=>{ isDown=false; }));
+track.addEventListener('mousemove', e => {
+  if(!isDown) return; e.preventDefault();
+  track.scrollLeft = sl - (e.pageX - track.offsetLeft - sx) * 1.4;
+});
+
+/* REDACTED */
+document.querySelectorAll('.rx').forEach(el => {
+  const original = el.textContent;
+  const revealed = el.dataset.t;
+  el.addEventListener('mouseenter', ()=>{ if(!el.classList.contains('open')){ el.textContent=revealed; el.style.background='rgba(179,32,13,0.1)'; el.style.color='var(--red)'; } });
+  el.addEventListener('mouseleave', ()=>{ if(!el.classList.contains('open')){ el.textContent=original; el.style.background=''; el.style.color=''; } });
+  el.addEventListener('click', ()=>{ el.textContent=revealed; el.classList.add('open'); });
+});
+
+/* DEAL CALCULATOR */
+const slider = document.getElementById('rsize');
+slider.addEventListener('input', ()=> document.getElementById('rsize-v').textContent = slider.value);
+
+document.getElementById('run-calc').addEventListener('click', ()=>{
+  const idle=document.getElementById('co-idle'), comp=document.getElementById('co-comp'), res=document.getElementById('co-res');
+  idle.style.display='none'; res.classList.remove('show'); comp.classList.add('show');
+  const steps=['Cross-referencing East India deal history…','Checking HVAC conversion benchmarks…','Pulling MEDDIC qualification data…','Running territory multipliers…','Applying Sarkar benchmarks…','Deal intelligence ready. ✓'];
+  let si=0;
+  const t=setInterval(()=>{ document.getElementById('comp-txt').textContent=steps[Math.min(si++,steps.length-1)]; if(si>steps.length)clearInterval(t); },340);
+  setTimeout(()=>{
+    clearInterval(t); comp.classList.remove('show');
+    const size=+slider.value, ter=document.getElementById('sel-ter').value, prod=document.getElementById('sel-prod').value, type=document.getElementById('sel-type').value;
+    let win=55;
+    if(ter==='east') win+=9; if(ter==='ne') win+=4;
+    if(prod==='cae') win+=6; if(type==='renewal') win+=13; if(type==='expansion') win+=7;
+    if(size>60) win-=9; if(size<15) win+=6;
+    win=Math.min(Math.max(Math.round(win),32),90);
+    let days=prod==='hvac'?55:prod==='power'?70:60;
+    if(size>50) days+=30; if(size>80) days+=20;
+    if(type==='renewal') days=Math.round(days*.55); if(ter==='bangladesh') days+=14;
+    const arr=(size*(type==='renewal'?3:type==='expansion'?2.8:2.4)).toFixed(1);
+    const cplx=size>60?{l:'HIGH — Multi-stakeholder deal',c:'r'}:size>25?{l:'MEDIUM — Standard enterprise',c:''}:{l:'LOW — Fast close likely',c:'g'};
+    const notes={
+      cae:"CAE deals in East India run through a triangle of engineering, procurement, and finance. The technical ROI narrative is the single biggest lever — that's why deals at Rs.25-40L get closed. Typical cycle: 45-90 days.",
+      hvac:"HVAC projects start with site assessment, not a pitch deck. Energy-savings ROI is what closes it — and a 92% fulfilment track record means clients come back. 100% key account retention historically.",
+      power:"Power equipment procurement typically runs through EPC and plant engineering channels. Equipment uptime framing shortcuts evaluation cycles significantly. Cold territory cold start is achievable — done it before.",
+      saas:"SaaS deals respond well to multi-year licensing structures. Three of the 
